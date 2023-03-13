@@ -1,5 +1,6 @@
 from enum import Enum
 from asciimatics.screen import Screen
+from asciimatics.event import KeyboardEvent
 import asyncio
 
 class BlockType(Enum):
@@ -15,7 +16,7 @@ class DirectionVector(Enum):
 
 level_1 = [[0, 0, BlockType.HASHTAG], [1, 0, BlockType.CIRCLE], [2, 0, BlockType.EMPTY], [3, 0, BlockType.HASHTAG]] # A 2d array consisting of [x value, y value, BlockType]
 
-playerX = 1
+playerX = 2
 playerY = 1
 
 def draw_level(screen):
@@ -67,38 +68,40 @@ def draw_player(screen):
                     colour=screen.COLOUR_YELLOW,
                     bg=screen.COLOUR_BLACK)
     
-def check_for_player_movement(keyboardInput, screen):
+def check_for_player_movement(event, screen):
     # Gets the player position from a global scope
     global playerX
     global playerY
 
-
-    if keyboardInput in (ord('A'), ord('a')):
-        if(not collision_check(screen, DirectionVector.LEFT)):
+    if event.key_code == ord('a') or event.key_code == ord('A'):
+        if(not collision_check(screen, DirectionVector.LEFT)): # If player is not colliding with a wall on the left
             clear_old_position(screen)
             playerX -= 1
-    elif keyboardInput in (ord('D'), ord('d')):
-        if(not collision_check(screen, DirectionVector.RIGHT)):
+    elif event.key_code == ord('d') or event.key_code == ord('D'):
+        if(not collision_check(screen, DirectionVector.RIGHT)): # If player is not colliding with a wall on the right
             clear_old_position(screen)
             playerX += 1
-    elif keyboardInput in (ord('W'), ord('w')):
-        if(not collision_check(screen, DirectionVector.UP)):
+    elif event.key_code == ord('w') or event.key_code == ord('W'):
+        if(not collision_check(screen, DirectionVector.UP)): # If player is not colliding with a wall above him
             clear_old_position(screen)
             playerY -= 1
-    elif keyboardInput in (ord('S'), ord('s')):
-        if(not collision_check(screen, DirectionVector.DOWN)):
+    elif event.key_code == ord('s') or event.key_code == ord('S'):
+        if(not collision_check(screen, DirectionVector.DOWN)): # If player is not colliding with a wall below him
             clear_old_position(screen)
             playerY += 1
 
 def draw_map(screen):
     while True:
-        keyboardInput = screen.get_key()
+        event = screen.get_event()
         draw_level(screen)
-        check_for_player_movement(keyboardInput, screen)
-        draw_player(screen)
         
-        if keyboardInput == screen.KEY_ESCAPE: # Quits the application if pressed
-            return
+        draw_player(screen)
+    
+
+        if event is not None and isinstance(event, KeyboardEvent):
+            check_for_player_movement(event, screen)
+            if event.key_code == screen.KEY_ESCAPE:
+                return
 
         screen.refresh()
         
